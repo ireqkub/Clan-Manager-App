@@ -135,26 +135,46 @@ export default function MembersPage() {
   }
 
   // ── Section 3: Quest Sync ─────────────────────────────────────────────────
-  const [syncingQuests, setSyncingQuests] = useState(false);
+  const [pendingQuestSync, setPendingQuestSync] = useState<PendingChange[]>([]);
+  const [applyingQuestSync, setApplyingQuestSync] = useState(false);
 
-  async function syncAllQuests() {
-    setSyncingQuests(true);
-    let success = 0; let fail = 0; let skipped = 0;
-    const updated = [...localMembers];
+  function analyzeQuestSync() {
+    const changes: PendingChange[] = [];
     for (const member of localMembers) {
       const f = parseFlair(member.flair);
-      // 📙 OR 📘 OR 🏆 → true; 📕 OR ⚠️ OR no emoji → false (only if currently true)
       const target = (f.hasGoldEmoji || f.hasGemEmoji || f.hasTrophyEmoji) ? true : false;
-      if (member.participateInClanQuests === target) { skipped++; continue; }
+      if (member.participateInClanQuests === target) continue; // already correct
+      changes.push({
+        memberId: member.playerId,
+        username: member.username,
+        oldFlair: member.participateInClanQuests ? '✅ Participating' : '⛔ Not Participating',
+        newFlair: target ? '✅ Participating' : '⛔ Not Participating',
+      });
+    }
+    if (changes.length === 0) {
+      toast({ title: 'Already in Sync', description: 'All members are already set correctly based on their flair.' });
+    } else {
+      setPendingQuestSync(changes);
+    }
+  }
+
+  async function applyQuestSync() {
+    if (!pendingQuestSync.length) return;
+    setApplyingQuestSync(true);
+    let success = 0; let fail = 0;
+    const updated = [...localMembers];
+    for (const change of pendingQuestSync) {
+      const f = parseFlair(localMembers.find(m => m.playerId === change.memberId)?.flair);
+      const target = (f.hasGoldEmoji || f.hasGemEmoji || f.hasTrophyEmoji) ? true : false;
       try {
-        await updateMemberQuestParticipation(clanId, member.playerId, target);
-        const idx = updated.findIndex((m) => m.playerId === member.playerId);
+        await updateMemberQuestParticipation(clanId, change.memberId, target);
+        const idx = updated.findIndex((m) => m.playerId === change.memberId);
         if (idx !== -1) updated[idx] = { ...updated[idx], participateInClanQuests: target };
         success++;
       } catch { fail++; }
     }
-    setLocalMembers(updated); setSyncingQuests(false);
-    toast({ title: fail === 0 ? 'Quest Sync Complete' : 'Partial Success', description: success === 0 && skipped > 0 ? 'All members already in sync.' : `${success} updated, ${skipped} already in sync${fail > 0 ? `, ${fail} failed` : ''}.`, variant: fail > 0 ? 'destructive' : 'default' });
+    setLocalMembers(updated); setPendingQuestSync([]); setApplyingQuestSync(false);
+    toast({ title: fail === 0 ? 'Quest Sync Complete' : 'Partial Success', description: `${success} updated${fail > 0 ? `, ${fail} failed` : ''}.`, variant: fail > 0 ? 'destructive' : 'default' });
   }
 
   // ── Section 4: Ledger & Log ───────────────────────────────────────────────
