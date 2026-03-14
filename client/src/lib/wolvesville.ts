@@ -97,12 +97,13 @@ export interface Member {
   flair: string | null;
   participateInClanQuests: boolean;
   rank?: string;
+  status?: string;
   joinDate?: string;
   lastOnline?: string;
   personalMessage?: string;
   xp?: number;
-  coins?: number;
-  gems?: number;
+  isCoLeader?: boolean;
+  creationTime?: string;
 }
 
 export async function getClanMembers(clanId: string): Promise<Member[]> {
@@ -134,18 +135,12 @@ export async function updateMemberQuestParticipation(
 export interface LedgerEntry {
   id?: string;
   type: string;
-  amount?: number;
-  coins?: number;
+  gold?: number;
   gems?: number;
   playerId?: string;
-  username?: string;
-  senderPlayerId?: string;
-  senderUsername?: string;
-  receiverPlayerId?: string;
-  receiverUsername?: string;
-  message?: string;
+  playerUsername?: string;
+  clanQuestId?: string;
   creationTime: string;
-  description?: string;
 }
 
 export async function getClanLedger(clanId: string): Promise<LedgerEntry[]> {
@@ -156,21 +151,20 @@ export async function getClanLedger(clanId: string): Promise<LedgerEntry[]> {
 
 export interface LogEntry {
   id?: string;
-  type: string;
+  action: string;
   playerId?: string;
-  username?: string;
+  playerUsername?: string;
+  playerBotId?: string;
+  playerBotOwnerUsername?: string;
   targetPlayerId?: string;
-  targetUsername?: string;
-  message?: string;
+  targetPlayerUsername?: string;
   creationTime: string;
   newFlair?: string;
   oldFlair?: string;
-  newQuestParticipation?: boolean;
-  oldQuestParticipation?: boolean;
 }
 
-export async function getClanLog(clanId: string): Promise<LogEntry[]> {
-  const res = await apiCall(`/clans/${clanId}/log`);
+export async function getClanLogs(clanId: string): Promise<LogEntry[]> {
+  const res = await apiCall(`/clans/${clanId}/logs`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -231,7 +225,17 @@ export function formatDateTimeGMT7(utcDateStr: string): string {
   }
 }
 
-export function toUTCDate(localGMT7Str: string): Date {
-  const localMs = new Date(localGMT7Str).getTime();
+export function toLocalDatetimeInputValue(utcDateStr: string): string {
+  const d = new Date(utcDateStr);
+  const gmt7 = new Date(d.getTime() + 7 * 60 * 60 * 1000);
+  return gmt7.toISOString().slice(0, 16);
+}
+
+export function fromLocalDatetimeInputToUTC(localStr: string): Date {
+  const localMs = new Date(localStr).getTime();
   return new Date(localMs - 7 * 60 * 60 * 1000);
+}
+
+export function nowAsLocalDatetimeInput(): string {
+  return toLocalDatetimeInputValue(new Date().toISOString());
 }
