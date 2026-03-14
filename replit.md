@@ -18,18 +18,33 @@ This app calls the Wolvesville API (`https://api.wolvesville.com`) directly from
 
 | Route | Page | Description |
 |-------|------|-------------|
-| `/` | Auth | Bot token login (validates via `POST /items/redeemApiHat`) |
+| `/` | Auth (Leader Login) | Bot token login (validates via `POST /items/redeemApiHat`) |
 | `/clans` | Clan Selection | Lists authorized clans from `GET /clans/authorized` |
 | `/members` | Member Management | Full management tools (see below) |
+| `/quest-fee` | Quest Fee | Apply 200© fee to low-XP quest participants |
+| `/quest-active` | Quest Active | Live quest view or available quest selection |
 
-## Member Management Features
+## Member Management Features (members page)
 
-1. **Member List** — table showing username, level, flair, quest status, last online, join date
-2. **Flair Deduction Engine** — Coin mode (deduct N©, add 📙) or Gem mode (deduct NG, add 📘)
-3. **Emoji Removal Tool** — strips 📙/📘/📕 from all member flairs
-4. **Quest Participation Sync** — 📙/📘→ true, 📕→ false, no emoji→ false
-5. **Ledger & Log Management** — filterable by date range (GMT+7), by type
-6. **CSV Export** — members, ledger, and logs export to CSV (with BOM for Excel)
+1. **Member List** — table showing username, level, flair, quest status, last online
+2. **Flair Deduction Engine** — Coin mode (deduct N©, add 📙) or Gem mode (deduct NG, add 📘); skips 📙/📘/📕/🏆; retains 0© or 0G when result is zero
+3. **Emoji Removal Tool** — strips 📙/📘/📕/⚠️/🏆 from all member flairs
+4. **Quest Participation Sync** — 📙/📘/🏆 → true; 📕/⚠️/no emoji → false (skip if already correct)
+5. **Ledger & Log Management** — date range filter (GMT+7), auto-detects latest FLAIR_EDITED; removes ⚠️ if value becomes >0 after donation update
+6. **CSV Export** — members, ledger, and logs export to CSV
+
+## Quest Fee Page
+
+- Fetches `GET /clans/{id}/quests/history`, finds latest quest by `tierEndTime`
+- Shows participants with XP < 3000
+- "Apply Fee" deducts 200© from each; adds ⚠️ if balance goes negative
+- Warns with link if a quest is currently active
+
+## Quest Active Page
+
+- Fetches `GET /clans/{id}/quests/active`
+- If active: shows quest details (promo image, type, xp, tier, times in GMT+7), participants sorted by XP
+- If 404 (no active quest): shows available quests as 5 cards with votes, plus shuffle vote section
 
 ## Flair Format
 
@@ -40,6 +55,8 @@ This app calls the Wolvesville API (`https://api.wolvesville.com`) directly from
 - 📙 = coin paid marker
 - 📘 = gem paid marker
 - 📕 = opt-out marker
+- ⚠️ = warning / negative balance
+- 🏆 = trophy / special member
 
 ## Wolvesville API
 
@@ -52,15 +69,23 @@ Key endpoints:
 - `GET /clans/{id}/members` — clan members
 - `PUT /clans/{id}/members/{memberId}/flair` — update flair
 - `PUT /clans/{id}/members/{memberId}/participateInQuests` — update quest participation
-- `GET /clans/{id}/ledger` — ledger entries
-- `GET /clans/{id}/log` — action log
+- `GET /clans/{id}/ledger` — ledger entries (DONATE type used for flair updates)
+- `GET /clans/{id}/logs` — action log (FLAIR_EDITED used for default start time)
+- `GET /clans/{id}/quests/history` — past quests
+- `GET /clans/{id}/quests/active` — current active quest (404 if none)
+- `GET /clans/{id}/quests/available` — available quests to vote/buy
+- `GET /clans/{id}/quests/votes` — votes per quest + shuffle votes
 
 ## Key Files
 
 - `client/src/lib/wolvesville.ts` — API client, flair parsing utilities, auth helpers
-- `client/src/pages/auth-page.tsx` — login page
+- `client/src/components/NavHeader.tsx` — shared sticky nav with breadcrumb + logout
+- `client/src/components/PendingChangesPanel.tsx` — reusable "preview changes → apply/deny" panel
+- `client/src/pages/auth-page.tsx` — Leader Login page
 - `client/src/pages/clans-page.tsx` — clan selection
 - `client/src/pages/members-page.tsx` — main management page
+- `client/src/pages/quest-fee-page.tsx` — quest fee application
+- `client/src/pages/quest-active-page.tsx` — active/available quest viewer
 - `client/src/components/ThemeToggle.tsx` — light/dark mode toggle
 - `client/src/index.css` — CSS variables (blue/slate theme)
 

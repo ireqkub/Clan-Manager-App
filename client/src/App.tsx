@@ -7,6 +7,8 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import ClansPage from "@/pages/clans-page";
 import MembersPage from "@/pages/members-page";
+import QuestFeePage from "@/pages/quest-fee-page";
+import QuestActivePage from "@/pages/quest-active-page";
 
 function Router() {
   return (
@@ -14,6 +16,8 @@ function Router() {
       <Route path="/" component={AuthPage} />
       <Route path="/clans" component={ClansPage} />
       <Route path="/members" component={MembersPage} />
+      <Route path="/quest-fee" component={QuestFeePage} />
+      <Route path="/quest-active" component={QuestActivePage} />
       <Route component={NotFound} />
     </Switch>
   );
