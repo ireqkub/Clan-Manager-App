@@ -87,7 +87,7 @@ export default function AuthPage() {
             </form>
 
             <p className="mt-4 text-center text-xs text-muted-foreground">
-              Don't have a bot token?{' '}
+              Don't have a token?{' '}
               <a
                 href="https://api-docs.wolvesville.com/#/?id=create-a-bot"
                 target="_blank"
@@ -96,8 +96,7 @@ export default function AuthPage() {
                 data-testid="link-create-bot"
               >
                 Create a bot
-              </a>{' '}
-              on the Wolvesville Developer Portal.
+              </a>
             </p>
           </div>
         </div>
