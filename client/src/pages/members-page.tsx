@@ -296,8 +296,8 @@ export default function MembersPage() {
     ], `${clanName}_members.csv`);
   }
   function exportLedger() {
-    downloadCsv([['Time (GMT+7)', 'Type', 'Player', 'Gold', 'Gems'],
-      ...filteredLedger.map((e) => [formatDateTimeGMT7(e.creationTime), e.type, e.playerUsername || '', e.gold ?? 0, e.gems ?? 0])
+    downloadCsv([['Time (GMT+7)', 'Type', 'Player', 'Gold', 'Gems', 'Comment'],
+      ...filteredLedger.map((e) => [formatDateTimeGMT7(e.creationTime), e.type, e.playerUsername || '', e.gold ?? 0, e.gems ?? 0, e.comment || ''])
     ], `${clanName}_ledger.csv`);
   }
   function exportLogs() {
@@ -508,9 +508,9 @@ export default function MembersPage() {
                 {ledgerLoading ? <div className="space-y-2">{[1,2,3].map(i=><Skeleton key={i} className="h-10 w-full"/>)}</div> : (
                   <div className="overflow-x-auto rounded-lg border border-border">
                     <Table>
-                      <TableHeader><TableRow className="border-border"><TableHead>Time (GMT+7)</TableHead><TableHead>Type</TableHead><TableHead>Player</TableHead><TableHead>Gold</TableHead><TableHead>Gems</TableHead></TableRow></TableHeader>
+                      <TableHeader><TableRow className="border-border"><TableHead>Time (GMT+7)</TableHead><TableHead>Type</TableHead><TableHead>Player</TableHead><TableHead>Gold</TableHead><TableHead>Gems</TableHead><TableHead>Comment</TableHead></TableRow></TableHeader>
                       <TableBody>
-                        {filteredLedger.length===0 ? <TableRow><TableCell colSpan={5} className="text-center py-6 text-muted-foreground">No entries.</TableCell></TableRow>
+                        {filteredLedger.length===0 ? <TableRow><TableCell colSpan={6} className="text-center py-6 text-muted-foreground">No entries.</TableCell></TableRow>
                           : filteredLedger.slice(0,100).map((e,i)=>(
                             <TableRow key={e.id||i} className="border-border">
                               <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{formatDateTimeGMT7(e.creationTime)}</TableCell>
@@ -518,6 +518,7 @@ export default function MembersPage() {
                               <TableCell className="text-sm">{e.playerUsername||'—'}</TableCell>
                               <TableCell className="text-sm font-mono text-yellow-600 dark:text-yellow-400">{e.gold?`${e.gold}©`:'—'}</TableCell>
                               <TableCell className="text-sm font-mono text-blue-600 dark:text-blue-400">{e.gems?`${e.gems}G`:'—'}</TableCell>
+                              <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate" title={e.comment||undefined}>{e.comment||'—'}</TableCell>
                             </TableRow>
                           ))}
                       </TableBody>

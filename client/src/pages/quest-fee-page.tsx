@@ -75,10 +75,9 @@ export default function QuestFeePage() {
       const f = parseFlair(sanitizeFlair(member.flair));
       const newCoins = f.coins - FEE_AMOUNT;
       const addWarning = newCoins < 0;
-      const displayCoins = Math.max(0, newCoins);
       const existingEmoji = f.hasGoldEmoji ? '📙' : f.hasGemEmoji ? '📘' : f.hasOptoutEmoji ? '📕' : f.hasTrophyEmoji ? '🏆' : f.hasWarningEmoji ? '⚠️' : '';
       const newEmoji = addWarning && !existingEmoji.includes('⚠️') ? '⚠️' : existingEmoji;
-      const newFlair = buildFlairString(displayCoins, f.gems, newEmoji, { retainZeroCoins: true });
+      const newFlair = buildFlairString(newCoins, f.gems, newEmoji, { retainZeroCoins: true });
       changes.push({ memberId: participant.playerId, username: participant.username, oldFlair: member.flair || '', newFlair });
     }
     if (changes.length === 0) toast({ title: 'No Members', description: 'No members to apply fee to.' });

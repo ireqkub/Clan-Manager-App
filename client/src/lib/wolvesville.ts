@@ -100,6 +100,7 @@ export interface LedgerEntry {
   gold?: number; gems?: number;
   playerId?: string; playerUsername?: string;
   clanQuestId?: string; creationTime: string;
+  comment?: string;
 }
 export async function getClanLedger(clanId: string): Promise<LedgerEntry[]> {
   const res = await apiCall(`/clans/${clanId}/ledger`);
@@ -194,7 +195,7 @@ export interface BuildFlairOpts {
 }
 export function buildFlairString(coins: number, gems: number, emoji: string = '', opts?: BuildFlairOpts): string {
   const parts: string[] = [];
-  if (coins > 0 || opts?.retainZeroCoins) parts.push(`${coins}©`);
+  if (coins !== 0 || opts?.retainZeroCoins) parts.push(`${coins}©`);
   if (gems > 0 || opts?.retainZeroGems) parts.push(`${gems}G`);
   if (emoji) parts.push(emoji);
   return parts.join(' ').trim();
