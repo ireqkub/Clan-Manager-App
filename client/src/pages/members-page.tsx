@@ -418,7 +418,7 @@ export default function MembersPage() {
 
         {/* ── Section 3: Quest Sync ── */}
         <SectionCard header={<><RefreshCw className="h-4 w-4"/><span className="font-semibold">Quest Participation Sync</span></>} headerColor="bg-sky-500 dark:bg-sky-600">
-          <div className="p-5">
+          <div className="p-5 space-y-4">
             <div className="grid md:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <p className="text-sm font-medium mb-2">Automatic Logic:</p>
@@ -428,11 +428,22 @@ export default function MembersPage() {
                 </ul>
               </div>
               <div className="flex items-end">
-                <Button onClick={syncAllQuests} disabled={syncingQuests} className="w-full bg-sky-500 hover:bg-sky-600 text-white" data-testid="button-sync-quests">
-                  {syncingQuests ? <><Loader2 className="h-4 w-4 mr-2 animate-spin"/>Syncing...</> : <><RefreshCw className="h-4 w-4 mr-2"/>Sync All to Quest</>}
+                <Button onClick={analyzeQuestSync} disabled={applyingQuestSync} className="w-full bg-sky-500 hover:bg-sky-600 text-white" data-testid="button-sync-quests">
+                  <Filter className="h-4 w-4 mr-2"/>Preview Sync Changes
                 </Button>
               </div>
             </div>
+            {pendingQuestSync.length > 0 && (
+              <PendingChangesPanel
+                title={`Quest Sync — ${pendingQuestSync.length} member(s) will change`}
+                changes={pendingQuestSync}
+                applying={applyingQuestSync}
+                onApply={applyQuestSync}
+                onDeny={() => setPendingQuestSync([])}
+                applyLabel="Apply Sync"
+                colorClass="blue"
+              />
+            )}
           </div>
         </SectionCard>
 
