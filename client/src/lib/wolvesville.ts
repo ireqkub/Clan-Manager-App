@@ -3,13 +3,19 @@ const TOKEN_KEY = 'wolvesville_bot_token';
 const CLAN_ID_KEY = 'wolvesville_selected_clan_id';
 const CLAN_NAME_KEY = 'wolvesville_selected_clan_name';
 
+// In-memory store — cleared when the JS context is destroyed (tab close / refresh loses it,
+// but sessionStorage restores it so the user doesn't need to re-authenticate after refresh).
+let _inMemoryToken: string | null = null;
+
 export function getToken(): string | null {
-  return sessionStorage.getItem(TOKEN_KEY);
+  return _inMemoryToken ?? sessionStorage.getItem(TOKEN_KEY);
 }
 export function setToken(token: string) {
+  _inMemoryToken = token;
   sessionStorage.setItem(TOKEN_KEY, token);
 }
 export function clearToken() {
+  _inMemoryToken = null;
   sessionStorage.removeItem(TOKEN_KEY);
   sessionStorage.removeItem(CLAN_ID_KEY);
   sessionStorage.removeItem(CLAN_NAME_KEY);

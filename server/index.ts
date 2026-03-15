@@ -22,6 +22,28 @@ app.use(
 
 app.use(express.urlencoded({ extended: false }));
 
+// Content Security Policy
+app.use((_req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader(
+      'Content-Security-Policy',
+      [
+        "default-src 'self'",
+        "connect-src 'self' https://api.wolvesville.com",
+        "img-src 'self' https://cdn.wolvesville.com data:",
+        "style-src 'self' 'unsafe-inline'",
+        "script-src 'self'",
+        "font-src 'self'",
+        "frame-ancestors 'none'",
+      ].join('; ')
+    );
+  }
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",

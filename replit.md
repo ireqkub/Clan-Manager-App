@@ -36,9 +36,8 @@ This app calls the Wolvesville API (`https://api.wolvesville.com`) directly from
 ## Quest Fee Page
 
 - Fetches `GET /clans/{id}/quests/history`, finds latest quest by `tierEndTime`
-- Shows participants with XP < 3000
-- "Apply Fee" deducts 200© from each; adds ⚠️ if balance goes negative
-- Warns with link if a quest is currently active
+- **Section 1**: Table of participants with XP < 3000; "Apply Fee" deducts 200©; adds ⚠️ if balance goes negative; warns if a quest is active
+- **Section 2 (TOP 1 QUEST)**: Awards 🏆 to the participant with the highest XP; removes 🏆 from previous holders; skips if top member already has 🏆; all changes show preview/confirm before API calls
 
 ## Quest Active Page
 
@@ -75,6 +74,14 @@ Key endpoints:
 - `GET /clans/{id}/quests/active` — current active quest (404 if none)
 - `GET /clans/{id}/quests/available` — available quests to vote/buy
 - `GET /clans/{id}/quests/votes` — votes per quest + shuffle votes
+
+## Security
+
+- **In-memory token store**: token held in a module-level JS variable (`_inMemoryToken`) — survives page navigation without sessionStorage reads, cleared on logout or tab close
+- **sessionStorage backup**: token also stored in sessionStorage so it survives page refresh within the same session
+- **XSS prevention**: DOMPurify (`client/src/lib/sanitize.ts`) sanitizes all flair/username strings from the API before parsing or display; React's default escaping protects text nodes
+- **CSP headers**: production builds set `Content-Security-Policy` with strict `connect-src` limited to `api.wolvesville.com`; `X-Frame-Options: DENY` and `X-Content-Type-Options: nosniff` always set
+- **Flair parsing safety**: regex only extracts expected characters (`©`, `G`, digits, specific emojis) — injection via flair strings is structurally impossible
 
 ## Key Files
 
